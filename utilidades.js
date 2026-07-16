@@ -1,0 +1,49 @@
+
+module.exports = {
+  nome: "utilidades",
+
+  executar: async (sock, msg, comando, args) => {
+
+    const jid = msg.key.remoteJid;
+
+    if (comando === "ping") {
+      await sock.sendMessage(jid, {
+        text: "🏓 Pong!"
+      });
+    }
+
+    if (comando === "hora") {
+      const hora = new Date().toLocaleTimeString("pt-BR");
+      await sock.sendMessage(jid, {
+        text: `⏰ Hora atual: ${hora}`
+      });
+    }
+
+    if (comando === "calc") {
+      try {
+        const math = require("mathjs");
+        const resultado = math.evaluate(args.join(" "));
+        await sock.sendMessage(jid, {
+          text: `🧮 Resultado: ${resultado}`
+        });
+      } catch {
+        await sock.sendMessage(jid, {
+          text: "❌ Cálculo inválido."
+        });
+      }
+    }
+
+    if (comando === "perfil") {
+      await sock.sendMessage(jid, {
+        text:
+`👤 PERFIL
+
+Número:
+${jid.split("@")[0]}
+
+Bot:
+FROST.X-BOT ❄️`
+      });
+    }
+  }
+};
