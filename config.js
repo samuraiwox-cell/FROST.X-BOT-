@@ -1,0 +1,19 @@
+
+module.exports = {
+  nomeBot: "FROST.X-BOT",
+  prefixo: "t",
+
+  dono: {
+    nome: "Seu Nome",
+    numero: "351938662266"
+  },
+
+  api: {
+    openWeather: ""
+  },
+
+  mensagens: {
+    bemVindo: "👋 Bem-vindo ao grupo!",
+    despedida: "👋 Até mais!"
+  }
+}
