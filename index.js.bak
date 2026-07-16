@@ -1,0 +1,122 @@
+
+const {
+  default: makeWASocket,
+  useMultiFileAuthState,
+  DisconnectReason
+} = require("@whiskeysockets/baileys");
+
+const pino = require("pino");
+const qrcode = require("qrcode-terminal");
+const config = require("./config");
+
+const menu = require("./comandos/menu");
+const utilidades = require("./comandos/utilidades");
+const admin = require("./comandos/admin");
+async function iniciar() {
+  const { state, saveCreds } = await useMultiFileAuthState("./session");
+
+  const sock = makeWASocket({
+    auth: state,
+    logger: pino({ level: "silent" })
+  });
+
+  sock.ev.on("creds.update", saveCreds);
+
+  sock.ev.on("connection.update", ({ connection, qr, lastDisconnect }) => {
+
+    if (qr) {
+      console.log("Escaneie o QR Code:");
+      qrcode.generate(qr, { small: true });
+    }
+
+    if (connection === "open") {
+      console.log(`${config.nomeBot} conectado com sucesso!`);
+    }
+
+    if (connection === "close") {
+      const motivo = lastDisconnect?.error?.output?.statusCode;
+
+      if (motivo !== DisconnectReason.loggedOut) {
+        iniciar();
+      } else {
+        console.log("Sessão encerrada.");
+      }
+    }
+  });
+
+
+  sock.ev.on("messages.upsert", async ({ messages }) => {
+
+    const msg = messages[0];
+
+    if (!msg.message) return;
+    if (msg.key.fromMe) return;
+
+    const texto =
+      msg.message.conversation ||
+      msg.message.extendedTextMessage?.text ||
+      "";
+
+    if (!texto.startsWith(config.prefixo)) return;
+
+    const comandoCompleto = texto
+      .slice(config.prefixo.length)
+      .trim();
+
+    const comando = comandoCompleto
+      .split(" ")[0]
+      .toLowerCase();
+
+    const args = comandoCompleto
+      .split(" ")
+      .slice(1);
+
+
+    if (comando === "menu") {
+      return menu.executar(sock, msg);
+    }
+
+
+    if ([
+      "ping",
+      "hora",
+      "calc",
+      "perfil"
+    ].includes(comando)) {
+
+      return utilidades.executar(
+        sock,
+        msg,
+        comando,
+        args
+      );
+    }
+
+if ([
+  "ban",
+  "mutar",
+  "promover",
+  "rebaixar"
+].includes(comando)) {
+
+  return admin.executar(
+    sock,
+    msg,
+    comando,
+    args
+  );
+}
+    if (comando === "teste") {
+      await sock.sendMessage(
+        msg.key.remoteJid,
+        {
+          text: "✅ FROST.X-BOT funcionando!"
+        }
+      );
+    }
+
+  });
+
+}
+
+iniciar();

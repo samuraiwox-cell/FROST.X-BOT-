@@ -1,0 +1,22 @@
+
+{
+  "name": "frost-x-bot",
+  "version": "1.0.0",
+  "description": "FROST.X-BOT WhatsApp",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "FROST.X",
+  "license": "MIT",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.18",
+    "axios": "^1.8.1",
+    "chalk": "^5.4.1",
+    "mathjs": "^14.2.1",
+    "pino": "^9.6.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
+
+
